@@ -100,7 +100,8 @@ class BaseDeepAD(metaclass=ABCMeta):
                  n_ensemble=1, seq_len=100, stride=1,
                  epoch_steps=-1, prt_steps=10,
                  device='cuda', contamination=0.1,
-                 verbose=1, random_state=42):
+                 verbose=1, random_state=42,
+                 return_losses=False):
         self.model_name = model_name
 
         self.data_type = data_type
@@ -148,6 +149,9 @@ class BaseDeepAD(metaclass=ABCMeta):
         self.checkpoint_data = {}
 
         self.random_state = random_state
+        self.return_losses = return_losses
+        self.losses = []
+        
         self.set_seed(random_state)
         return
 
@@ -444,6 +448,10 @@ class BaseDeepAD(metaclass=ABCMeta):
                     break
 
             t = time.time() - t1
+            
+            if self.return_losses:
+                self.losses.append(total_loss/cnt)
+            
             if self.verbose >= 1 and (i == 0 or (i+1) % self.prt_steps == 0):
                 print(f'epoch{i+1:3d}, '
                       f'training loss: {total_loss/cnt:.6f}, '
